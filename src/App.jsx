@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from "react";
 
+const USUARIO_ADMIN = "admin2026";
+
 const PRIORIDAD = {
   "Viernes cena": 1,
   "Sábado comida": 2,
@@ -68,6 +70,8 @@ export default function App() {
   const [usuarioActivo, setUsuarioActivo] = useState(null);
   const [disponibilidad, setDisponibilidad] = useState({});
 
+  const esAdmin = usuarioActivo === USUARIO_ADMIN;
+
   const entrar = () => {
     const limpio = nombre.trim();
     if (!limpio) return;
@@ -117,7 +121,11 @@ export default function App() {
       .slice(0, 3);
   }, [conteoPorId]);
 
-  const resetear = () => setDisponibilidad({});
+  const resetear = () => {
+    if (!esAdmin) return;
+    const confirmar = window.confirm("¿Seguro que quieres resetear todos los votos?");
+    if (confirmar) setDisponibilidad({});
+  };
 
   const botonEstilo = {
     border: "none",
@@ -170,11 +178,18 @@ export default function App() {
             <button onClick={entrar} style={{ ...botonEstilo, background: "#111827", color: "white" }}>Entrar</button>
           </div>
 
-          {usuarioActivo && <p>Has entrado como <strong>{usuarioActivo}</strong>. Ya puedes marcar y desmarcar días.</p>}
+          {usuarioActivo && (
+            <p>
+              Has entrado como <strong>{esAdmin ? "Administrador" : usuarioActivo}</strong>.
+              {esAdmin ? " Tienes opciones de administrador." : " Ya puedes marcar y desmarcar días."}
+            </p>
+          )}
 
-          <button onClick={resetear} style={{ ...botonEstilo, background: "#dc2626", color: "white", marginTop: 8 }}>
-            Resetear contador
-          </button>
+          {esAdmin && (
+            <button onClick={resetear} style={{ ...botonEstilo, background: "#dc2626", color: "white", marginTop: 8 }}>
+              Resetear contador
+            </button>
+          )}
         </section>
 
         {calendario.map((mes) => (
